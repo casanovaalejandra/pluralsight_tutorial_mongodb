@@ -41,9 +41,26 @@ async function main(){
     assert(addedItem._id); //if it has an id it means it was added
     const addedItemQuery = await circulationRepo.getById(addedItem._id);
     assert.deepEqual(addedItemQuery, newItem);
-  }
 
-  catch(error){
+    const updatedItem = await circulationRepo.update(addedItem._id,{
+      "Newspaper": "the OTHER papaer",
+      "Daily Circulation, 2004": 3571,
+      "Daily Circulation, 2013": 2506,
+      "Change in Daily Circulation, 2004-2013": -390,
+      "Pulitzer Prize Winners and Finalists, 1990-2003": 0,
+      "Pulitzer Prize Winners and Finalists, 2004-2014": 1,
+      "Pulitzer Prize Winners and Finalists, 1990-2014": 1
+    });
+    const newAddedItemQuery = await circulationRepo.getById(addedItem._id); // grab the item we just added
+    assert.deepEqual(newAddedItemQuery.Newspaper, "the OTHER papaer ");
+
+    const removed = await circulationRepo.remove(addedItem._id);
+    assert(removed);
+    const deletedItem = await circulationRepo.getById(addedItem._id);
+    console.log(deletedItem); 
+
+  }
+catch(error){
     console.log(error);
   }
 

@@ -59,6 +59,37 @@ function add(item){
     }
   })
 }
+function update(id, newItem){
+  return new Promise(async(resolve, reject)=>{
+    const client = new MongoClient(url);
+    try{
+      await client.connect();
+      const db = client.db(dbName);
+      const updatedItem = await db.collection('newspapers')
+      .findOneAndReplace({_id: ObjectId(id)}, newItem);
+      resolve(updatedItem.value);
+      client.close();
+
+    }catch(error){
+      reject(error);
+    }
+  })
+}
+function remove(id){
+  return new Promise(async(resolve, reject)=>{
+    const client = new MongoClient(url);
+    try{
+      await client.connect();
+      const db = client.db(dbName);
+      const remove = db.collection('newspapers').deleteOne({_ID: ObjectId(id)});
+      resolve(removed.deletedCount === 1);
+      client.close();
+
+    }catch(error){
+      reject(error);
+    }
+  })
+}
 
   function loadData(data){
     return new Promise(async(resolve, reject)=>{ //we can only make our promise async not the whole function
@@ -77,7 +108,7 @@ function add(item){
 
     })
   }
-  return {loadData, get, getById, add}
+  return {loadData, get, getById, add, update, remove}
 
   }
 
