@@ -26,6 +26,24 @@ function circulationRepo(){
     })
   }
 
+  function getById(id){
+    return new Promise(async(resolve,reject)=>{
+      const client = new MongoClient(url);
+      try {
+        await client.connect();
+        const db = client.db(dbName);
+        // We search by OBJECT id not by STRING id
+        const item = await db.collection('newspapers').findOne({_id: ObjectId(id)}); // iT WILL RETURN ONLY THE FIRST ONE, it returns a object id
+
+        resolve(item);
+        client.close();
+      } catch (error) {
+        reject(error);
+      }
+
+    })
+  }
+
 
   function loadData(data){
     return new Promise(async(resolve, reject)=>{ //we can only make our promise async not the whole function
@@ -36,6 +54,7 @@ function circulationRepo(){
             results = await db.collection('newspapers').insertMany(data);// everything that happens inside a DB in mongo happens inside a collection
             //insertMany takes a json with data and returns the results of the INSERTIONS of that data to the db
             resolve(results);
+
         }
         catch(error){
           reject(error);
@@ -44,7 +63,7 @@ function circulationRepo(){
 
     })
   }
-  return {loadData, get}
+  return {loadData, get, getById}
 
   }
 
