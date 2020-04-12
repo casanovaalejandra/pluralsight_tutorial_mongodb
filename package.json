@@ -1,0 +1,14 @@
+{
+  "name": "pluralsight_tutorial",
+  "version": "1.0.0",
+  "description": "project to wokr with mongodb and nodejs in pluralsight",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "alejandra casanova sepulveda",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^3.5.5"
+  }
+}
