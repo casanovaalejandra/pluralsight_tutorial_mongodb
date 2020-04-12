@@ -27,6 +27,20 @@ async function main(){
     const id = getData[4]._id.toString();
     const byId = await circulationRepo.getById(id);
     assert.deepEqual(byId, getData[4]);
+
+    const newItem = {
+      "Newspaper": "the papaer",
+      "Daily Circulation, 2004": 3571,
+      "Daily Circulation, 2013": 2506,
+      "Change in Daily Circulation, 2004-2013": -390,
+      "Pulitzer Prize Winners and Finalists, 1990-2003": 0,
+      "Pulitzer Prize Winners and Finalists, 2004-2014": 1,
+      "Pulitzer Prize Winners and Finalists, 1990-2014": 1
+    };
+    const addedItem = await circulationRepo.add(newItem);
+    assert(addedItem._id); //if it has an id it means it was added
+    const addedItemQuery = await circulationRepo.getById(addedItem._id);
+    assert.deepEqual(addedItemQuery, newItem);
   }
 
   catch(error){
