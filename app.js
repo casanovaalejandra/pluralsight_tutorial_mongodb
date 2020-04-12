@@ -1,5 +1,7 @@
 const MongoClient = require('mongodb').MongoClient;
-const circuilationRepo = require('./repos/circulationRepo');
+const assert = require('assert');
+
+const circulationRepo = require('./repos/circulationRepo');
 const data = require('./circulation.json');
 
 const url = 'mongodb://localhost:27017';
@@ -9,11 +11,25 @@ async function main(){
   const client = new MongoClient(url);
   await client.connect();
 
-  const results = await circuilationRepo.loadData(data);
-  console.log(results.insertedCount, results.ops);
-  const admin = client.db(dbName).admin();
-  //console.log(await admin.serverStatus());
-  console.log(await admin.listDatabases());
+  try{
+    const results = await circulationRepo.loadData(data);
+    assert.equal(data.length, results.insertedCount); //this assert will help us know if what we are doing is correct, if it is not we will know
+
+    const getData = await circulationRepo.get(); //we should see the 50 records we added to the DB
+    assert.equal(data.length, getData.length);
+  }
+
+  catch(error){
+    console.log(error);
+  }
+
+  finally{
+    const admin = client.db(dbName).admin();
+    await client.db(dbName).dropDatabase(); //we just deleted the database...
+    console.log(await admin.listDatabases());
+    client.close(); //this will trigger the terminal to not hang open when we do node app.js
+  }
+
 
 }
 main();
