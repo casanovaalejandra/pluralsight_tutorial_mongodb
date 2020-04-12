@@ -17,6 +17,12 @@ async function main(){
 
     const getData = await circulationRepo.get(); //we should see the 50 records we added to the DB
     assert.equal(data.length, getData.length);
+
+    const filterData = await circulationRepo.get({Newspaper: getData[4].Newspaper}); // We are going to pass a query to the get method
+    assert.deepEqual(filterData[0], getData[4]);
+
+    const limitData = await circulationRepo.get({},3);
+    assert.equal(limitData.length,3);
   }
 
   catch(error){
