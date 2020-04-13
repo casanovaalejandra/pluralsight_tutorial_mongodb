@@ -6,7 +6,7 @@ function circulationRepo(){
   const url = 'mongodb://localhost:27017';
   const dbName = 'circulation';
 
-  function get(query, limit){
+function get(query, limit){
     return new Promise(async(resolve, reject)=>{
       const client = new MongoClient(url, { useNewUrlParser: true });
       try {
@@ -25,8 +25,7 @@ function circulationRepo(){
       }
     })
   }
-
-  function getById(id){
+function getById(id){
     return new Promise(async(resolve,reject)=>{
       const client = new MongoClient(url);
       try {
@@ -82,7 +81,7 @@ function remove(id){
       await client.connect();
       const db = client.db(dbName);
       const remove = db.collection('newspapers').deleteOne({_ID: ObjectId(id)});
-      resolve(removed.deletedCount === 1);
+      resolve(remove.deletedCount === 1);
       client.close();
 
     }catch(error){
@@ -90,8 +89,7 @@ function remove(id){
     }
   })
 }
-
-  function loadData(data){
+function loadData(data){
     return new Promise(async(resolve, reject)=>{ //we can only make our promise async not the whole function
       const client = new MongoClient(url);
         try{
@@ -108,9 +106,59 @@ function remove(id){
 
     })
   }
-  return {loadData, get, getById, add, update, remove}
+function averageFinalists(){
+  return new Promise(async(resolve, reject)=>{
+    const client = new MongoClient(url);
+    try{
+      await client.connect();
+      const db = client.db(dbName);
+      // we are going to group all the newspapers and average the pullitzer price finalists 1990-2014
+      // aggregate function is going to return a cursor
+      const average = await db.collection('newspapers')
+      .aggregate([{$group:
+        {
+          _id:null,
+          avgFinalists: {$avg: "$Pulitzer Prize Winners and Finalists, 1990-2014"}
+        }}]).toArray();
+      resolve(average[0].avgFinalists);
+    }catch(error){
+      reject(error);
+    }
+  })
+}
+// we are going to group all the newspapers and average the pullitzer price finalists 1990-2014
+// aggregate function is going to return a cursor
+function averageFinalistsByChange(){
+  return new Promise(async(resolve, reject)=>{
+    const client = new MongoClient(url);
+    try{
+      await client.connect();
+      const db = client.db(dbName);
+
+      const average = await db.collection('newspapers')
+      .aggregate([
+        {$project:{
+              "Newspaper":1,
+              "Change in Daily Circulation, 2004-2013":1,
+              "Pulitzer Prize Winners and Finalists, 1990-2014":1,
+              overallChange: {
+                $cond: { if: {$gte: ["$Change in Daily Circulation, 2004-2013",0], then: "positive", else: "negative"}
+              }
+              }},
+              { $group:
+                {
+                  _id:"$overallChange",
+                  avgFinalists: {$avg: "$Pulitzer Prize Winners and Finalists, 1990-2014"}
+                }}
+              ]).toArray();
+      resolve(average);
+      client.close();
+    }catch(error){
+      reject(error);
+    }
+  });
+}
+return {loadData, get, getById, add, update, remove, averageFinalists,averageFinalistsByChange}
 
   }
-
-
 module.exports = circulationRepo();

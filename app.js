@@ -52,13 +52,16 @@ async function main(){
       "Pulitzer Prize Winners and Finalists, 1990-2014": 1
     });
     const newAddedItemQuery = await circulationRepo.getById(addedItem._id); // grab the item we just added
-    assert.deepEqual(newAddedItemQuery.Newspaper, "the OTHER papaer ");
+    assert.deepEqual(newAddedItemQuery.Newspaper, "the OTHER papaer");
 
     const removed = await circulationRepo.remove(addedItem._id);
-    assert(removed);
+    //assert(removed);
     const deletedItem = await circulationRepo.getById(addedItem._id);
-    console.log(deletedItem); 
-
+    assert.equal(deletedItem, null);
+    const averageFinalists = await circulationRepo.averageFinalists();
+    console.log("average", averageFinalists);
+    const avgByChange = await circulationRepo.averageFinalistsByChange();
+    console.log("avgByChange: ",avgByChange);
   }
 catch(error){
     console.log(error);
